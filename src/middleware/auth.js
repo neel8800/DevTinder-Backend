@@ -1,3 +1,4 @@
+/* Middleware for admin user */
 const adminAuth = (req, res, next) => {
   const adminToken = "neel";
   if (adminToken === "neel") {
@@ -7,6 +8,7 @@ const adminAuth = (req, res, next) => {
   }
 };
 
+/* Middleware for normal user */
 const userAuth = (req, res, next) => {
   const adminToken = "neel";
   if (adminToken === "neel") {
@@ -15,4 +17,5 @@ const userAuth = (req, res, next) => {
     res.status(401).send("Unauthorized User");
   }
 };
+
 module.exports = { adminAuth, userAuth };
