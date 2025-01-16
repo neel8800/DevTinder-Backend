@@ -1,6 +1,7 @@
 const express = require("express");
 const { connectDB } = require("./config/database");
 const { UserModel } = require("./models/user");
+const { allowedUpdateFields } = require("./constants/userSchemaConstants");
 
 const app = express();
 
@@ -28,7 +29,7 @@ app.post("/signup", async (request, response) => {
     await userData.save();
     response.status(201).send({ _id: userData._id });
   } catch (error) {
-    response.status(400).send("Error while signing up user");
+    response.status(400).send("Error while signing up user: " + error);
   }
 });
 
@@ -77,15 +78,24 @@ app.delete("/users/:id", async (request, response) => {
 
 app.patch("/users/:id", async (request, response) => {
   const userId = request.params?.id;
-  // const userData = new UserModel(request.body);
   const userData = request.body;
   try {
+    const isUpdateAllowed = Object.keys(userData).every((key) =>
+      allowedUpdateFields.includes(key)
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error(
+        `Update is allowed only on fields: ${allowedUpdateFields}.`
+      );
+    }
+
     const updatedUser = await UserModel.findByIdAndUpdate(userId, userData, {
       returnDocument: "after",
+      runValidators: true,
     });
     response.status(200).send(updatedUser);
   } catch (error) {
-    console.log(error);
-    response.status(404).send("Something went wrong");
+    response.status(404).send("Something went wrong: " + error);
   }
 });
