@@ -1,6 +1,6 @@
 const validator = require("validator");
 const { UserModel } = require("../models/user");
-const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const validateSignup = (request) => {
   const signupData = request.body;
@@ -17,18 +17,24 @@ const validateSignup = (request) => {
 
 const validateLogin = async (request) => {
   const { email, password } = request.body;
-  const userWithEmail = await UserModel.findOne({ email: email });
+  if (!email || !password) {
+    throw new Error("Email and password required.");
+  }
 
+  const userWithEmail = await UserModel.findOne({ email: email });
   if (!userWithEmail) {
     throw new Error("Invalid Credentials.");
   }
 
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    userWithEmail.password
-  );
-  if (!isPasswordValid) {
+  const isValidPassword = await userWithEmail.validatePassword(password);
+  if (!isValidPassword) {
     throw new Error("Invalid Credentials.");
+  }
+
+  try {
+    return await userWithEmail.getJWT();
+  } catch (error) {
+    throw new Error(`${error}`);
   }
 };
 

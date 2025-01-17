@@ -1,6 +1,8 @@
 const { Schema, model } = require("mongoose");
 const schemaValidator = require("validator");
 const { genderEnum } = require("../constants/userSchemaConstants");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 /* User schema definition */
 const userSchema = new Schema(
@@ -81,6 +83,19 @@ const userSchema = new Schema(
     collection: "users",
   }
 );
+
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({ _id: user._id }, "$Neel@8800", {
+    expiresIn: "0d",
+  });
+
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+  return await bcrypt.compare(passwordInputByUser, this.password);
+};
 
 /* User model creation */
 const UserModel = model("UserModel", userSchema);
