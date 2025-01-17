@@ -2,6 +2,8 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const { UserModel } = require("./models/user");
 const { allowedUpdateFields } = require("./constants/userSchemaConstants");
+const bcrypt = require("bcrypt");
+const { validateSignup, validateLogin } = require("./utils/userDataValidation");
 
 const app = express();
 
@@ -26,10 +28,21 @@ app.use(express.json());
 app.post("/signup", async (request, response) => {
   const userData = new UserModel(request.body);
   try {
+    validateSignup(request);
+    userData.password = await bcrypt.hash(userData.password, 10);
     await userData.save();
     response.status(201).send({ _id: userData._id });
   } catch (error) {
     response.status(400).send("Error while signing up user: " + error);
+  }
+});
+
+app.post("/login", async (request, response) => {
+  try {
+    await validateLogin(request);
+    response.status(200).send("Login successful.");
+  } catch (error) {
+    response.status(400).send({ Error: error.message });
   }
 });
 
