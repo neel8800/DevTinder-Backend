@@ -4,6 +4,9 @@ const { UserModel } = require("./models/user");
 const { allowedUpdateFields } = require("./constants/userSchemaConstants");
 const bcrypt = require("bcrypt");
 const { validateSignup, validateLogin } = require("./utils/userDataValidation");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth");
 
 const app = express();
 
@@ -23,6 +26,7 @@ connectDB()
 
 /* Setting up APIs to work with JSON data */
 app.use(express.json());
+app.use(cookieParser());
 
 /* Users APIs */
 app.post("/signup", async (request, response) => {
@@ -33,16 +37,35 @@ app.post("/signup", async (request, response) => {
     await userData.save();
     response.status(201).send({ _id: userData._id });
   } catch (error) {
-    response.status(400).send("Error while signing up user: " + error);
+    response.status(400).send(`${error}`);
   }
 });
 
 app.post("/login", async (request, response) => {
   try {
-    await validateLogin(request);
+    const token = await validateLogin(request);
+    response.cookie("token", token);
     response.status(200).send("Login successful.");
   } catch (error) {
-    response.status(400).send({ Error: error.message });
+    response.status(400).send(`${error}`);
+  }
+});
+
+app.get("/profile", userAuth, async (request, response) => {
+  try {
+    const loggedInUser = request.user;
+    response.status(200).send(loggedInUser);
+  } catch (error) {
+    response.status(400).send(`${error}`);
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (request, response) => {
+  try {
+    const { email } = request.user;
+    response.status(200).send(`${email} has sent connection request.`);
+  } catch (error) {
+    response.status(400).send(`${error}`);
   }
 });
 
@@ -53,7 +76,7 @@ app.get("/users", async (request, response) => {
     const usersData = await UserModel.find(filterData);
     response.status(200).send(usersData);
   } catch (error) {
-    response.status(404).send("Something went wrong");
+    response.status(404).send(`${error}`);
   }
 });
 
@@ -63,7 +86,7 @@ app.get("/users/:id", async (request, response) => {
     const userData = await UserModel.findById(userId);
     response.status(200).send(userData);
   } catch (error) {
-    response.status(404).send("Something went wrong");
+    response.status(404).send(`${error}`);
   }
 });
 
