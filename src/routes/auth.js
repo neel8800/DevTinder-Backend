@@ -14,9 +14,14 @@ authRouter.post("/signup", async (request, response) => {
     validateSignup(request);
     userData.password = await bcrypt.hash(userData.password, 10);
     await userData.save();
-    response.status(201).send({ _id: userData._id });
+    response.status(201).send({
+      message: "Signup successful.",
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+    });
   } catch (error) {
-    response.status(400).send(`${error}`);
+    response.status(400).json({ message: `${error.message}` });
   }
 });
 
@@ -24,9 +29,20 @@ authRouter.post("/login", async (request, response) => {
   try {
     const token = await validateLogin(request);
     response.cookie("token", token);
-    response.status(200).send("Login successful.");
+    response
+      .status(200)
+      .send({ message: `${request.body.email} is logged in successfully.` });
   } catch (error) {
-    response.status(400).send(`${error}`);
+    response.status(400).json({ message: `${error.message}` });
+  }
+});
+
+authRouter.post("/logout", async (request, response) => {
+  try {
+    response.cookie("token", null, { expires: new Date(Date.now()) });
+    response.status(200).send({ message: "Logged out successfully." });
+  } catch (error) {
+    response.status(400).json({ message: `${error.message}` });
   }
 });
 

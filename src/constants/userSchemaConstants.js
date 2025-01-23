@@ -1,7 +1,8 @@
-const genderEnum = ["Male", "Female", "Other"];
+const validUserGender = ["Male", "Female", "Other"];
 const allowedUpdateFields = [
   "firstName",
   "lastName",
+  "email",
   "photoUrl",
   "about",
   "age",
@@ -9,4 +10,4 @@ const allowedUpdateFields = [
   "skills",
 ];
 
-module.exports = { genderEnum, allowedUpdateFields };
+module.exports = { validUserGender, allowedUpdateFields };
