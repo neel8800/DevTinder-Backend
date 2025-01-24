@@ -5,4 +5,12 @@ const validConnectionRequestStatus = [
   "rejected",
 ];
 
-module.exports = { validConnectionRequestStatus };
+const validSendRequestStatuses = ["ignored", "interested"];
+
+const validReviewRequestStatuses = ["rejected", "accepted"];
+
+module.exports = {
+  validConnectionRequestStatus,
+  validSendRequestStatuses,
+  validReviewRequestStatuses,
+};

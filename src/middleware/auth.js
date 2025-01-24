@@ -26,7 +26,7 @@ const userAuth = async (request, response, next) => {
     request.user = loggedInUser;
     next();
   } catch (error) {
-    response.status(400).send(`${error}`);
+    response.status(400).send({ message: `${error.message}` });
   }
 };
 

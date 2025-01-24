@@ -7,10 +7,12 @@ const connectionRequestSchema = new Schema(
   {
     fromUserId: {
       required: true,
+      ref: "UserModel",
       type: Schema.Types.ObjectId,
     },
     toUserId: {
       required: true,
+      ref: "UserModel",
       type: Schema.Types.ObjectId,
     },
     connectionRequestStatus: {

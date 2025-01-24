@@ -3,6 +3,10 @@ const { userAuth } = require("../middleware/auth");
 const { UserModel } = require("../models/user");
 const { connectionRequestModel } = require("../models/connectionRequest");
 const { default: mongoose } = require("mongoose");
+const {
+  validSendRequestStatuses,
+  validReviewRequestStatuses,
+} = require("../constants/connectionRequestSchemaConstants");
 
 const connectionRequestRouter = express.Router();
 
@@ -17,8 +21,7 @@ connectionRequestRouter.post(
       const connectionRequestStatus = request.params.status;
 
       /* Throw an error if API request triggered with status except "interested" and "ignored" */
-      const allowedStatus = ["interested", "ignored"];
-      if (!allowedStatus.includes(connectionRequestStatus)) {
+      if (!validSendRequestStatuses.includes(connectionRequestStatus)) {
         throw new Error("Invalid connection request status.");
       }
 
@@ -40,7 +43,7 @@ connectionRequestRouter.post(
           { fromUserId: toUserId, toUserId: fromUserId },
         ],
       });
-      console.log(existingConnectionRequest);
+
       if (existingConnectionRequest) {
         throw new Error("Connection request already exist.");
       }
@@ -55,6 +58,47 @@ connectionRequestRouter.post(
       response.status(200).send(newConnectionRequest);
     } catch (error) {
       response.status(400).json({ message: `${error.message}` });
+    }
+  }
+);
+
+connectionRequestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (request, response) => {
+    try {
+      const loggedInUser = request.user;
+      const reviewRequestStatus = request.params.status;
+      const reviewRequestId = request.params.requestId;
+
+      /* Validate the status from API params */
+      if (!validReviewRequestStatuses.includes(reviewRequestStatus)) {
+        throw new Error("Invalid review request status.");
+      }
+
+      /* Check for requestId in database with:
+        - requestId should be valid
+        - toUser == loggedInUser
+        - connectionRequestStatus == interested
+      */
+      const connectionRequest = await connectionRequestModel.findOne({
+        _id: reviewRequestId,
+        toUserId: loggedInUser._id,
+        connectionRequestStatus: "interested",
+      });
+
+      if (!connectionRequest) {
+        return response
+          .status(404)
+          .send({ message: "Connection request not found." });
+      }
+
+      /* If it is valid request then update the status of connection request */
+      connectionRequest.connectionRequestStatus = reviewRequestStatus;
+      const connectionRequestData = await connectionRequest.save();
+      return response.status(200).send(connectionRequestData);
+    } catch (error) {
+      return response.status(400).send({ message: `${error.message}` });
     }
   }
 );
