@@ -6,9 +6,9 @@ const {
   validateLogin,
 } = require("../utils/userDataValidation");
 
-const authRouter = express.Router();
+const authenticationRouter = express.Router();
 
-authRouter.post("/signup", async (request, response) => {
+authenticationRouter.post("/signup", async (request, response) => {
   const userData = new UserModel(request.body);
   try {
     validateSignup(request);
@@ -25,7 +25,7 @@ authRouter.post("/signup", async (request, response) => {
   }
 });
 
-authRouter.post("/login", async (request, response) => {
+authenticationRouter.post("/login", async (request, response) => {
   try {
     const token = await validateLogin(request);
     response.cookie("token", token);
@@ -37,7 +37,7 @@ authRouter.post("/login", async (request, response) => {
   }
 });
 
-authRouter.post("/logout", async (request, response) => {
+authenticationRouter.post("/logout", async (request, response) => {
   try {
     response.cookie("token", null, { expires: new Date(Date.now()) });
     response.status(200).send({ message: "Logged out successfully." });
@@ -46,4 +46,4 @@ authRouter.post("/logout", async (request, response) => {
   }
 });
 
-module.exports = { authRouter };
+module.exports = { authenticationRouter };

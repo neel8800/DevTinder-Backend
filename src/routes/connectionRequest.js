@@ -4,9 +4,9 @@ const { UserModel } = require("../models/user");
 const { connectionRequestModel } = require("../models/connectionRequest");
 const { default: mongoose } = require("mongoose");
 
-const requestRouter = express.Router();
+const connectionRequestRouter = express.Router();
 
-requestRouter.post(
+connectionRequestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,
   async (request, response) => {
@@ -59,4 +59,4 @@ requestRouter.post(
   }
 );
 
-module.exports = { requestRouter };
+module.exports = { connectionRequestRouter };

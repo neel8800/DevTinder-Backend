@@ -3,9 +3,9 @@ const cookieParser = require("cookie-parser");
 
 const { connectDB } = require("./config/database");
 
-const { authRouter } = require("./routes/auth");
-const { profileRouter } = require("./routes/profile");
-const { requestRouter } = require("./routes/request");
+const { authenticationRouter } = require("./routes/authentication");
+const { userProfileRouter } = require("./routes/userProfile");
+const { connectionRequestRouter } = require("./routes/connectionRequest");
 
 /* Initializing application */
 const app = express();
@@ -27,6 +27,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* Routers that handles the user requests */
-app.use("/", authRouter);
-app.use("/", profileRouter);
-app.use("/", requestRouter);
+app.use("/", authenticationRouter);
+app.use("/", userProfileRouter);
+app.use("/", connectionRequestRouter);
