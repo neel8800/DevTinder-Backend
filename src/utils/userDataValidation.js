@@ -1,6 +1,6 @@
 const validator = require("validator");
 const { UserModel } = require("../models/user");
-const jwt = require("jsonwebtoken");
+const { allowedUpdateFields } = require("../constants/userSchemaConstants");
 
 const validateSignup = (request) => {
   const signupData = request.body;
@@ -38,4 +38,14 @@ const validateLogin = async (request) => {
   }
 };
 
-module.exports = { validateSignup, validateLogin };
+const validateUpdateUserData = async (request) => {
+  const userData = request.body;
+  const isUpdateAllowed = Object.keys(userData).every((field) =>
+    allowedUpdateFields.includes(field)
+  );
+  console.log(`isUpdateAllowed: ${isUpdateAllowed}`);
+
+  return isUpdateAllowed;
+};
+
+module.exports = { validateSignup, validateLogin, validateUpdateUserData };

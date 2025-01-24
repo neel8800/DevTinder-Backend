@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 const schemaValidator = require("validator");
-const { genderEnum } = require("../constants/userSchemaConstants");
+const { validUserGender } = require("../constants/userSchemaConstants");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -35,9 +35,9 @@ const userSchema = new Schema(
       type: String,
       required: true,
       enum: {
-        values: genderEnum,
+        values: validUserGender,
         message: (props) =>
-          `"${props.value}" is not a valid gender value. Allowed gender values are ${genderEnum}`,
+          `"${props.value}" is not a valid gender value. Allowed gender values are ${validUserGender}`,
       },
     },
     password: {
