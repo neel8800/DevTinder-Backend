@@ -22,20 +22,12 @@ const validateLogin = async (request) => {
   }
 
   const userWithEmail = await UserModel.findOne({ email: email });
-  if (!userWithEmail) {
-    throw new Error("Invalid Credentials.");
-  }
-
   const isValidPassword = await userWithEmail.validatePassword(password);
-  if (!isValidPassword) {
+  if (!userWithEmail || !isValidPassword) {
     throw new Error("Invalid Credentials.");
   }
 
-  try {
-    return await userWithEmail.getJWT();
-  } catch (error) {
-    throw new Error(`${error}`);
-  }
+  return await userWithEmail.getJWT();
 };
 
 const validateUpdateUserData = async (request) => {
@@ -43,7 +35,6 @@ const validateUpdateUserData = async (request) => {
   const isUpdateAllowed = Object.keys(userData).every((field) =>
     allowedUpdateFields.includes(field)
   );
-  console.log(`isUpdateAllowed: ${isUpdateAllowed}`);
 
   return isUpdateAllowed;
 };
